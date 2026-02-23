@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bookr - Terminal Reader</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg: #050505;
+  --surface: #0a0a0c;
+  --border: rgba(16, 185, 129, 0.2);
+  --accent: #10b981;
+  --text: #e1e1e3;
+  --muted: #88888e;
+  --radius: 12px;
+  --radius-xl: 24px;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  background-color: var(--bg);
+  background-image: radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px);
+  background-size: 24px 24px;
+  color: var(--text);
+  line-height: 1.6;
+}
+
+header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 60px;
+  background: rgba(5, 5, 5, 0.8);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 5%;
+  z-index: 1000;
+}
+
+.logo { font-weight: 800; color: var(--accent); letter-spacing: 1px; }
+.nav { display: flex; gap: 20px; }
+.nav a { color: var(--muted); text-decoration: none; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+
+.container { max-width: 1100px; margin: auto; padding: 100px 20px; }
+
+.hero { margin-bottom: 80px; }
+.hero h1 { font-size: clamp(40px, 8vw, 56px); font-weight: 800; margin: 0; letter-spacing: -3px; line-height: 1; }
+.hero p { color: var(--muted); font-size: 18px; margin: 15px 0 0; }
+
+.section-title { font-size: 13px; text-transform: uppercase; color: var(--accent); letter-spacing: 2px; margin-bottom: 40px; display: block; font-weight: 800; }
+
+/* 01 OVERVIEW */
+.overview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 30px;
+  margin-bottom: 100px;
+}
+
+.ov-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 40px;
+}
+
+.ov-card h3 {
+  font-size: 12px;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin: 0 0 20px 0;
+  font-weight: 800;
+}
+
+.ov-list { padding: 0; list-style: none; margin: 0; }
+.ov-list li { margin-bottom: 10px; font-size: 15px; color: var(--text); }
+.ov-list b { color: #fff; }
+
+.tag-container { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px; }
+.tag { 
+  padding: 5px 14px; border: 1px solid rgba(16, 185, 129, 0.4); 
+  border-radius: 50px; font-size: 12px; font-family: 'Fira Code'; color: var(--accent); 
+  background: rgba(16, 185, 129, 0.05);
+}
+
+/* INSTALL & TERMINALS */
+.terminal { 
+  background: #000; border: 1px solid var(--border); border-radius: var(--radius); 
+  margin-bottom: 15px; cursor: pointer; transition: 0.2s; overflow: hidden;
+}
+.term-head { padding: 12px 16px; background: #0a0a0c; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; font-size: 10px; color: var(--muted); font-family: 'Fira Code'; text-transform: uppercase; }
+.term-body { padding: 20px; overflow-x: auto; }
+pre { margin: 0; font-family: 'Fira Code', monospace; font-size: 13px; color: #d1d1d1; }
+.c-cmd { color: var(--accent); }
+
+details summary { 
+  background: var(--surface); padding: 18px; border: 1px solid var(--border); 
+  border-radius: var(--radius); cursor: pointer; font-size: 13px; font-weight: 700; list-style: none; margin-bottom: 10px; 
+}
+details[open] summary { border-bottom-left-radius: 0; border-bottom-right-radius: 0; border-bottom: none; color: var(--accent); }
+details[open] .terminal { border-top-left-radius: 0; border-top-right-radius: 0; border-top: none; margin-bottom: 0; }
+
+/* 04 CONTROLS */
+.controls-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 15px; margin-top: 30px; }
+.control-item { font-size: 14px; color: var(--muted); display: flex; align-items: center; gap: 10px; }
+.key { 
+  font-family: 'Fira Code'; color: var(--accent); background: rgba(16, 185, 129, 0.1); 
+  padding: 4px 8px; border: 1px solid var(--border); border-radius: 6px; font-size: 12px; min-width: 35px; text-align: center; 
+}
+
+/* --- REVEAL ANIMATION REUSABLE --- */
+.reveal { 
+  opacity: 0; 
+  transform: translateY(30px); 
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+  will-change: opacity, transform;
+}
+
+.reveal.active { 
+  opacity: 1; 
+  transform: translateY(0); 
+}
+
+footer { text-align: center; padding: 80px 20px; font-size: 12px; color: var(--muted); border-top: 1px solid rgba(255,255,255,0.05); }
+
+@media (max-width: 768px) {
+  .overview-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">BOOKR_</div>
+  <nav class="nav">
+    <a href="#overview">Overview</a>
+    <a href="#install">Install</a>
+    <a href="#build">Build</a>
+    <a href="#controls">Controls</a>
+  </nav>
+</header>
+
+<div class="container">
+  <div class="hero reveal">
+    <h1>Terminal Reader</h1>
+    <p>Distraction-free reading environment.</p>
+  </div>
+
+  <span class="section-title reveal" id="overview">01. Overview</span>
+  <div class="overview-grid">
+    <div class="ov-card reveal">
+      <h3>Features</h3>
+      <ul class="ov-list">
+        <li>Fullscreen terminal reader</li>
+        <li>Folder-based library browser</li>
+        <li>Whole-word search with highlight</li>
+        <li>TOC support (where available)</li>
+        <li>Reading position persistence</li>
+      </ul>
+    </div>
+
+    <div class="ov-card reveal">
+      <h3>Important Notes</h3>
+      <ul class="ov-list">
+        <li><b>TOC:</b> epub (nav/NCX), fb2 (XML), pdf (heuristics)</li>
+        <li><b>Footnotes:</b> epub supported ([1], ¹²)</li>
+        <li><b>Position:</b> saved automatically per file</li>
+      </ul>
+    </div>
+
+    <div class="ov-card reveal">
+      <h3>Supported Formats</h3>
+      <div class="tag-container">
+        <span class="tag">txt</span><span class="tag">fb2</span><span class="tag">epub</span><span class="tag">pdf</span>
+      </div>
+    </div>
+
+    <div class="ov-card reveal">
+      <h3>Dependencies</h3>
+      <ul class="ov-list">
+        <li><b>fb2 / epub:</b> pandoc</li>
+        <li><b>pdf:</b> pdftotext (from poppler)</li>
+      </ul>
+    </div>
+  </div>
+
+  <span class="section-title reveal" id="install">02. Installation</span>
+  <div class="install-grid">
+    <details class="reveal">
+      <summary>macOS</summary>
+      <div class="terminal" data-code="brew install pandoc poppler" onclick="copy(this)">
+        <div class="term-head"><span>Terminal</span><span class="status">Click to copy</span></div>
+        <div class="term-body"><pre><span class="c-cmd">brew install</span> pandoc poppler</pre></div>
+      </div>
+    </details>
+    <details class="reveal">
+      <summary>Arch Linux</summary>
+      <div class="terminal" data-code="sudo pacman -S pandoc poppler" onclick="copy(this)">
+        <div class="term-head"><span>Terminal</span><span class="status">Click to copy</span></div>
+        <div class="term-body"><pre><span class="c-cmd">sudo pacman</span> -S pandoc poppler</pre></div>
+      </div>
+    </details>
+    <details class="reveal">
+      <summary>Debian</summary>
+      <div class="terminal" data-code="sudo apt update&#10;sudo apt install pandoc poppler-utils" onclick="copy(this)">
+        <div class="term-head"><span>Terminal</span><span class="status">Click to copy</span></div>
+        <div class="term-body"><pre><span class="c-cmd">sudo apt</span> update
+<span class="c-cmd">sudo apt</span> install pandoc poppler-utils</pre></div>
+      </div>
+    </details>
+    <details class="reveal">
+      <summary>Fedora</summary>
+      <div class="terminal" data-code="sudo dnf install pandoc poppler-utils" onclick="copy(this)">
+        <div class="term-head"><span>Terminal</span><span class="status">Click to copy</span></div>
+        <div class="term-body"><pre><span class="c-cmd">sudo dnf</span> install pandoc poppler-utils</pre></div>
+      </div>
+    </details>
+    <details class="reveal">
+      <summary>NixOS</summary>
+      <div class="terminal" data-code="nix-shell -p pandoc poppler" onclick="copy(this)">
+        <div class="term-head"><span>Terminal</span><span class="status">Click to copy</span></div>
+        <div class="term-body"><pre><span class="c-cmd">nix-shell</span> -p pandoc poppler</pre></div>
+      </div>
+    </details>
+    <details class="reveal">
+      <summary>FreeBSD</summary>
+      <div class="terminal" data-code="sudo pkg update&#10;sudo pkg install pandoc poppler" onclick="copy(this)">
+        <div class="term-head"><span>Terminal</span><span class="status">Click to copy</span></div>
+        <div class="term-body"><pre><span class="c-cmd">sudo pkg</span> update
+<span class="c-cmd">sudo pkg</span> install pandoc poppler</pre></div>
+      </div>
+    </details>
+  </div>
+
+  <span class="section-title reveal" id="build" style="margin-top: 60px;">03. Build & Launch</span>
+  <div class="terminal reveal" data-code="cmake -S . -B build&#10;cmake --build build" onclick="copy(this)">
+    <div class="term-head"><span>Build</span><span class="status">Click to copy</span></div>
+    <div class="term-body"><pre><span class="c-cmd">cmake</span> -S . -B build
+cmake --build build</pre></div>
+  </div>
+  <div class="terminal reveal" data-code="./build/bookr" onclick="copy(this)">
+    <div class="term-head"><span>Launch</span><span class="status">Click to copy</span></div>
+    <div class="term-body"><pre><span class="c-cmd">./build/bookr</span></pre></div>
+  </div>
+
+  <span class="section-title reveal" id="controls" style="margin-top: 60px;">04. Controls</span>
+  <div class="controls-grid reveal">
+    <div class="control-item"><span class="key">→</span> Next</div>
+    <div class="control-item"><span class="key">←</span> Prev</div>
+    <div class="control-item"><span class="key">/</span> Search</div>
+    <div class="control-item"><span class="key">t</span> TOC</div>
+    <div class="control-item"><span class="key">f</span> Footnotes</div>
+    <div class="control-item"><span class="key">q</span> Quit</div>
+  </div>
+</div>
+
+<footer>Bookr 2026</footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const revealElements = document.querySelectorAll('.reveal');
+  
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('active');
+      } else {
+        // Убираем класс, чтобы анимация срабатывала снова при скролле вверх
+        entry.target.classList.remove('active');
+      }
+    });
+  }, { 
+    threshold: 0.1,
+    rootMargin: "0px 0px -50px 0px" // Срабатывает чуть раньше
+  });
+
+  revealElements.forEach(el => observer.observe(el));
+});
+
+function copy(el) {
+  const code = el.getAttribute("data-code");
+  navigator.clipboard.writeText(code);
+  const status = el.querySelector(".status");
+  status.innerText = "COPIED";
+  status.style.color = "var(--accent)";
+  setTimeout(() => { 
+    status.innerText = "CLICK TO COPY"; 
+    status.style.color = ""; 
+  }, 1200);
+}
+</script>
+</body>
+</html>
