@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ArimaDev | Gateway</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --arima-color: #ff0000;
+            --mizuki-color: #ffaa00;
+            --term-accent: #00ff41;
+            --transition-speed: 1.2s;
+        }
+
+        body, html {
+            margin: 0; padding: 0; height: 100%;
+            background: #000; color: #fff;
+            font-family: 'Cinzel', serif;
+            overflow: hidden;
+            display: flex; justify-content: center; align-items: center;
+        }
+
+        /* Ускорение рендеринга слоев */
+        #page-transition, #noise-layer, canvas, .container {
+            will-change: opacity, transform;
+        }
+
+        #page-transition {
+            position: fixed; inset: 0;
+            background: #000; z-index: 100;
+            transition: opacity var(--transition-speed) ease-in-out;
+            pointer-events: none;
+        }
+
+        #noise-layer {
+            position: fixed; inset: 0;
+            background: url('https://upload.wikimedia.org/wikipedia/commons/7/76/1k_Grain_Noise.png');
+            opacity: 0; pointer-events: none; z-index: 20;
+            transition: opacity 0.8s ease;
+        }
+
+        canvas {
+            position: fixed; inset: 0; z-index: 2;
+            pointer-events: none; transition: opacity 1.5s ease;
+        }
+
+        .vignette {
+            position: fixed; inset: 0;
+            background: radial-gradient(circle, transparent 20%, #000 150%);
+            z-index: 5; pointer-events: none;
+        }
+
+        #ghost-text {
+            position: fixed; z-index: 25;
+            font-size: clamp(1rem, 3.5vw, 2rem);
+            letter-spacing: 8px; text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.2); opacity: 0;
+            transition: opacity 2.5s ease; text-align: center;
+            width: 80%; line-height: 1.6; pointer-events: none;
+        }
+
+        .container {
+            position: relative; z-index: 30;
+            display: flex; gap: clamp(30px, 8vw, 120px);
+            transition: opacity 1s ease, transform 1s cubic-bezier(0.2, 0, 0.2, 1);
+        }
+
+        .gate {
+            text-decoration: none; padding: 20px;
+            display: flex; flex-direction: column; align-items: center;
+            transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0.4;
+        }
+
+        .gate:hover { opacity: 1; transform: translateY(-10px) scale(1.05); }
+
+        .gate-name {
+            font-size: clamp(1.5rem, 5vw, 3rem);
+            letter-spacing: 12px; text-transform: uppercase; color: #fff;
+            transition: 0.4s ease;
+        }
+
+        .gate-desc {
+            font-size: 0.6rem; letter-spacing: 4px;
+            color: #555; margin-top: 10px; text-transform: uppercase;
+        }
+
+        .gate-arima:hover .gate-name { color: var(--arima-color); text-shadow: 0 0 25px var(--arima-color); }
+        .gate-mizuki:hover .gate-name { color: var(--mizuki-color); text-shadow: 0 0 25px var(--mizuki-color); }
+
+        /* Terminator Modal Оптимизация */
+        #terminator-modal {
+            display: none; position: fixed; inset: 0;
+            background: #000; z-index: 1000; padding: 15px;
+        }
+
+        .modal-frame { position: relative; width: 100%; height: 100%; border: 1px solid #111; }
+
+        .close-btn {
+            position: absolute; right: 20px; top: 20px;
+            color: #444; cursor: pointer; z-index: 1001;
+            font-size: 9px; letter-spacing: 2px;
+            border: 1px solid #222; padding: 6px 12px;
+            transition: 0.3s; text-transform: uppercase;
+        }
+
+        .close-btn:hover { color: var(--term-accent); border-color: var(--term-accent); background: rgba(0,255,65,0.05); }
+
+        .terminal-widget {
+    position: fixed;
+    bottom: 30px;
+    left: 30px;
+    width: 50px;
+    height: 50px;
+    background: rgba(0, 0, 0, 0.8);
+    border: 1px solid rgba(0, 255, 65, 0.2);
+    border-radius: 4px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: rgba(0, 255, 65, 0.5);
+    text-decoration: none;
+    z-index: 200;
+    transition: all 0.4s ease;
+    overflow: hidden;
+    backdrop-filter: blur(5px);
+}
+
+.terminal-widget:hover {
+    border-color: #00ff41;
+    color: #00ff41;
+    box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
+    transform: translateY(-5px);
+}
+
+.terminal-icon {
+    font-size: 1.2rem;
+    z-index: 2;
+}
+
+/* Эффект бегущей линии сканера */
+.terminal-scanner {
+    position: absolute;
+    top: -100%;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        to bottom,
+        transparent,
+        rgba(0, 255, 65, 0.1),
+        transparent
+    );
+    animation: scan-line 3s infinite linear;
+    z-index: 1;
+}
+
+@keyframes scan-line {
+    0% { top: -100%; }
+    100% { top: 100%; }
+}
+
+/* Скрытие на мобилках, чтобы не мешало контенту */
+@media (max-width: 600px) {
+    .terminal-widget {
+        bottom: 20px;
+        left: 20px;
+        width: 40px;
+        height: 40px;
+    }
+}
+
+        footer {
+            position: fixed; bottom: 25px; width: 100%;
+            text-align: center; z-index: 30; font-size: 0.55rem;
+            letter-spacing: 3px; color: rgba(255, 255, 255, 0.15);
+            pointer-events: none;
+        }
+
+        @media (max-width: 768px) {
+            .container { flex-direction: column; gap: 60px; }
+            .gate { opacity: 0.8; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="page-transition"></div>
+    <div id="noise-layer"></div>
+    <div id="ghost-text"></div>
+    <canvas id="particleCanvas"></canvas>
+    <div class="vignette"></div>
+
+    <main class="container" id="main-ui">
+        <a href="/arima" class="gate gate-arima" onmouseenter="setMode('arima')" onmouseleave="setMode('normal')">
+            <span class="gate-name">Arima</span>
+            <span class="gate-desc">Restless Dreams</span>
+        </a>
+
+        <a href="/mizuki" class="gate gate-mizuki" onmouseenter="setMode('mizuki')" onmouseleave="setMode('normal')">
+            <span class="gate-name">Mizuki</span>
+            <span class="gate-desc">Fires Fade</span>
+        </a>
+    </main>
+
+    <div id="terminator-modal">
+        <div class="modal-frame">
+            <div class="close-btn" onclick="closeTerminator()">[ Terminate_Session ]</div>
+            <iframe id="term-iframe" src="" width="100%" height="100%" frameborder="0"></iframe>
+        </div>
+    </div>
+
+    <a href="/terminal" class="terminal-widget" title="System Access">
+    <div class="terminal-icon">
+        <i class="fa-solid fa-terminal"></i>
+    </div>
+    <div class="terminal-scanner"></div>
+</a>
+
+    <footer>© 2026 ARIMA216. WHERE DREAMS COME TO DIE</footer>
+
+    <script>
+        const canvas = document.getElementById('particleCanvas');
+        const ctx = canvas.getContext('2d');
+        const noise = document.getElementById('noise-layer');
+        const ghostText = document.getElementById('ghost-text');
+        const mainUI = document.getElementById('main-ui');
+        const trans = document.getElementById('page-transition');
+        const termModal = document.getElementById('terminator-modal');
+        const termIframe = document.getElementById('term-iframe');
+        
+        let particles = [], mouse = { tx: 0, ty: 0 }, mode = 'normal';
+        let idleTimer, isIdle = false, buffer = "";
+
+        // Инициализация
+        window.addEventListener('load', () => {
+            trans.style.opacity = '0';
+            resize();
+            animate();
+            resetIdle();
+        });
+
+        // Клавиатура (Пасхалка)
+        document.addEventListener('keydown', (e) => {
+            buffer = (buffer + e.key.toLowerCase()).slice(-20);
+            if (buffer.includes("aeza") || buffer.includes("terminator")) {
+                openTerminator();
+                buffer = "";
+            }
+            resetIdle();
+        });
+
+        function openTerminator() {
+            termIframe.src = "https://terminator.aeza.net";
+            termModal.style.display = 'block';
+        }
+
+        function closeTerminator() {
+            termModal.style.display = 'none';
+            termIframe.src = "";
+        }
+
+        // Canvas Логика
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            initParticles();
+        }
+
+        window.addEventListener('resize', resize);
+        window.addEventListener('mousemove', e => {
+            mouse.tx = (e.clientX - window.innerWidth / 2) / 150;
+            mouse.ty = (e.clientY - window.innerHeight / 2) / 150;
+            resetIdle();
+        });
+
+        function resetIdle() {
+            if (isIdle) {
+                isIdle = false;
+                ghostText.style.opacity = '0';
+                mainUI.style.opacity = '1';
+                mainUI.style.transform = 'scale(1)';
+            }
+            clearTimeout(idleTimer);
+            idleTimer = setTimeout(showGhost, 8000);
+        }
+
+        function showGhost() {
+            if (termModal.style.display === 'block') return;
+            isIdle = true;
+            const texts = {
+                arima: "In my restless dreams, I see that town...",
+                mizuki: "The fire reaches for the sky.",
+                normal: "Can you see the truth?"
+            };
+            ghostText.innerText = texts[mode] || texts.normal;
+            ghostText.style.opacity = '1';
+            mainUI.style.opacity = '0';
+            mainUI.style.transform = 'scale(0.98)';
+        }
+
+        function setMode(m) {
+            mode = m;
+            noise.style.opacity = (m === 'arima') ? '0.2' : '0';
+        }
+
+        class Particle {
+            constructor() { this.reset(); }
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.baseSize = Math.random() * 1.2 + 0.2;
+                this.size = this.baseSize;
+                this.sy = Math.random() * -0.3 - 0.1;
+                this.sx = Math.random() * 0.2 - 0.1;
+                this.op = Math.random() * 0.5 + 0.1;
+            }
+            update() {
+                this.x -= mouse.tx * (this.size * 0.4);
+                this.y -= mouse.ty * (this.size * 0.4);
+                
+                let ts = this.baseSize;
+                this.color = '255, 255, 255';
+                
+                if (mode === 'mizuki') { this.color = '255, 160, 50'; ts *= 2.5; }
+                else if (mode === 'arima') { this.color = '220, 0, 0'; ts *= 2; }
+
+                this.size += (ts - this.size) * 0.1;
+                this.y += this.sy;
+                this.x += this.sx;
+
+                if (this.y < -10) this.y = canvas.height + 10;
+                if (this.x < -10) this.x = canvas.width + 10;
+                if (this.x > canvas.width + 10) this.x = -10;
+            }
+            draw() {
+                ctx.fillStyle = `rgba(${this.color}, ${this.op})`;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function initParticles() {
+            particles = [];
+            const count = innerWidth < 768 ? 80 : 250;
+            for (let i = 0; i < count; i++) particles.push(new Particle());
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let p of particles) { p.update(); p.draw(); }
+            requestAnimationFrame(animate);
+        }
+
+        // Переходы
+        document.querySelectorAll('.gate').forEach(g => {
+            g.onclick = e => {
+                e.preventDefault();
+                const href = g.getAttribute('href');
+                trans.style.opacity = '1';
+                setTimeout(() => location.href = href, 1100);
+            };
+        });
+    </script>
+</body>
+</html>

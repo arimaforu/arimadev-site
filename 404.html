@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ERROR | THE VOID</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=VT323&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --glitch-color: #fff;
+            --void-bg: #050505;
+        }
+
+        body, html {
+            margin: 0; padding: 0; height: 100%;
+            background: var(--void-bg);
+            color: var(--glitch-color);
+            font-family: 'VT323', monospace;
+            overflow: hidden;
+            display: flex; justify-content: center; align-items: center;
+        }
+
+        /* Эффект сканирующих линий (CRT) */
+        body::before {
+            content: " ";
+            position: fixed; inset: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 100;
+            background-size: 100% 4px, 3px 100%;
+            pointer-events: none;
+        }
+
+        /* Контейнер с помехами */
+        #static-canvas {
+            position: fixed; inset: 0;
+            opacity: 0.15; z-index: 1;
+        }
+
+        .content {
+            position: relative; z-index: 10;
+            text-align: center;
+        }
+
+        .error-code {
+            font-size: clamp(5rem, 15vw, 10rem);
+            font-family: 'Cinzel', serif;
+            margin: 0;
+            position: relative;
+            animation: glitch-skew 1s infinite linear alternate-reverse;
+        }
+
+        /* Эффект раздвоения (Glitch) */
+        .error-code::before, .error-code::after {
+            content: "404";
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--void-bg);
+        }
+
+        .error-code::before {
+            left: 2px; text-shadow: -2px 0 #ff00c1;
+            clip: rect(44px, 450px, 56px, 0);
+            animation: glitch-anim 5s infinite linear alternate-reverse;
+        }
+
+        .error-code::after {
+            left: -2px; text-shadow: -2px 0 #00fff9;
+            clip: rect(44px, 450px, 56px, 0);
+            animation: glitch-anim2 5s infinite linear alternate-reverse;
+        }
+
+        .message {
+            font-size: 1.5rem; letter-spacing: 5px;
+            text-transform: uppercase; margin-top: -20px;
+            opacity: 0.8;
+        }
+
+        .back-link {
+            display: inline-block; margin-top: 40px;
+            color: #555; text-decoration: none;
+            border: 1px solid #333; padding: 10px 25px;
+            transition: 0.3s; font-family: 'Cinzel', serif;
+            font-size: 0.8rem; letter-spacing: 2px;
+        }
+
+        .back-link:hover {
+            color: #fff; border-color: #fff;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+        }
+
+        @keyframes glitch-anim {
+            0% { clip: rect(31px, 9999px, 94px, 0); }
+            20% { clip: rect(62px, 9999px, 42px, 0); }
+            /* ... и так далее для резких скачков */
+            100% { clip: rect(89px, 9999px, 98px, 0); }
+        }
+
+        @keyframes glitch-skew {
+            0% { transform: skew(1deg); }
+            10% { transform: skew(-1deg); }
+            100% { transform: skew(0deg); }
+        }
+
+        @keyframes glitch-anim2 {
+            0% { clip: rect(10px, 9999px, 20px, 0); }
+            100% { clip: rect(80px, 9999px, 90px, 0); }
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="static-canvas"></canvas>
+
+    <div class="content">
+        <h1 class="error-code" data-text="404">404</h1>
+        <p class="message">Signal Lost in the Void</p>
+        <a href="/" class="back-link">Return to Reality</a>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('static-canvas');
+        const ctx = canvas.getContext('2d');
+
+        function resize() {
+            canvas.width = window.innerWidth / 2; // Уменьшаем разрешение для стиля
+            canvas.height = window.innerHeight / 2;
+        }
+
+        function noise() {
+            const imageData = ctx.createImageData(canvas.width, canvas.height);
+            const data = imageData.data;
+            for (let i = 0; i < data.length; i += 4) {
+                const val = Math.random() * 255;
+                data[i] = val;     // R
+                data[i + 1] = val; // G
+                data[i + 2] = val; // B
+                data[i + 3] = 255; // A
+            }
+            ctx.putImageData(imageData, 0, 0);
+            requestAnimationFrame(noise);
+        }
+
+        window.addEventListener('resize', resize);
+        resize();
+        noise();
+
+        // Случайные подергивания текста
+        setInterval(() => {
+            const el = document.querySelector('.error-code');
+            if (Math.random() > 0.95) {
+                el.style.transform = `translate(${Math.random()*10}px, ${Math.random()*10}px)`;
+                setTimeout(() => el.style.transform = 'translate(0,0)', 50);
+            }
+        }, 100);
+    </script>
+</body>
+</html>
