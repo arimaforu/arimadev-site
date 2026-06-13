@@ -5,489 +5,347 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Arima216</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <style>
         :root {
-            --win11-bg: rgba(15, 15, 15, 0.92);
-            --win11-border: rgba(139, 0, 0, 0.3);
-            --win11-accent: #8b0000;
-            --text-main: #c7c7c7;
-            --sh-glow: rgba(139, 0, 0, 0.4);
+            --bg: #050505;
+            --panel: rgba(8, 8, 8, 0.82);
+            --panel-strong: rgba(10, 10, 10, 0.92);
+            --border: rgba(255, 255, 255, 0.05);
+            --border-soft: rgba(255, 255, 255, 0.03);
+            --text: #c0c0c0;
+            --text-secondary: #7a7a7a;
+            --glow: rgba(255, 255, 255, 0.05);
         }
 
-        /* КАСТОМНЫЙ СКРОЛЛБАР */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #050505; }
-        ::-webkit-scrollbar-thumb { background: var(--win11-accent); border-radius: 0; }
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
 
-        body, html {
-            margin: 0; padding: 0; height: 100%;
+        ::-webkit-scrollbar-track {
             background: #050505;
-            color: var(--text-main);
-            font-family: 'Segoe UI Variable Display', 'Segoe UI', sans-serif;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.14);
+            border-radius: 0;
+        }
+
+        html, body {
+            margin: 0;
+            width: 100%;
+            height: 100%;
             overflow: hidden;
-            display: flex; justify-content: center; align-items: center;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: var(--bg);
+            color: var(--text);
+            font-family: "Segoe UI Variable Display", "Segoe UI", sans-serif;
+            position: relative;
         }
 
         .noise {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: url('https://upload.wikimedia.org/wikipedia/commons/7/76/1k_Grain_Noise.png');
-            opacity: 0.05; pointer-events: none; z-index: 9999;
+            position: fixed;
+            inset: 0;
+            background: url("https://upload.wikimedia.org/wikipedia/commons/7/76/1k_Grain_Noise.png");
+            opacity: 0.05;
+            pointer-events: none;
+            z-index: 9999;
         }
 
-        .background {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), 
-                        url('https://i.pinimg.com/1200x/61/4a/77/614a7793a4377f2ec6896f1ceba83ae6.jpg');
-            background-size: cover; background-position: center;
-            filter: blur(8px) grayscale(0.6); z-index: -1;
+.background {
+    position: fixed;
+    inset: -20px;
+
+    background:
+        linear-gradient(
+            rgba(0,0,0,0.25),
+            rgba(0,0,0,0.35)
+        ),
+        url("https://i.pinimg.com/1200x/61/4a/77/614a7793a4377f2ec6896f1ceba83ae6.jpg");
+
+    background-size: cover;
+    background-position: center 35%;
+
+    filter:
+        blur(8px)
+        grayscale(0.85)
+        brightness(0.45)
+        contrast(1.1);
+
+    transform: scale(1.08);
+    z-index: -1;
+}
+
+        @keyframes dark-pulse {
+            0%, 100% {
+                color: #c0c0c0;
+                opacity: 0.86;
+                text-shadow:
+                    0 0 8px rgba(255, 255, 255, 0.08),
+                    0 0 20px rgba(0, 0, 0, 0.9);
+            }
+            50% {
+                color: #7b7b7b;
+                opacity: 0.58;
+                text-shadow:
+                    0 0 12px rgba(255, 255, 255, 0.03),
+                    0 0 18px rgba(0, 0, 0, 0.95);
+            }
         }
 
-        /* МЯГКАЯ ВИБРАЦИЯ ОКНА (МЕНЬШЕ ТРЯСКИ) */
-        @keyframes window-shake {
-            0% { transform: translate(0, 0); }
-            25% { transform: translate(-1px, 0.5px); }
-            50% { transform: translate(1px, -0.5px); }
-            75% { transform: translate(-0.5px, -1px); }
-            100% { transform: translate(0, 0); }
+        @keyframes glitch-1 {
+            0% { transform: translate(0, 0); opacity: 0; }
+            20% { transform: translate(-1px, 0); opacity: 0.18; }
+            40% { transform: translate(1px, 0); opacity: 0.1; }
+            60% { transform: translate(-2px, 0); opacity: 0.2; }
+            80% { transform: translate(2px, 0); opacity: 0.12; }
+            100% { transform: translate(0, 0); opacity: 0; }
         }
 
-        .shaking {
-            animation: window-shake 0.15s ease-in-out infinite !important;
-            box-shadow: 0 0 60px rgba(139, 0, 0, 0.3) !important;
+        @keyframes glitch-2 {
+            0% { transform: translate(0, 0); opacity: 0; }
+            20% { transform: translate(1px, 0); opacity: 0.14; }
+            40% { transform: translate(-1px, 0); opacity: 0.1; }
+            60% { transform: translate(2px, 0); opacity: 0.18; }
+            80% { transform: translate(-2px, 0); opacity: 0.1; }
+            100% { transform: translate(0, 0); opacity: 0; }
         }
 
-/* ГЛИТЧ-ЭФФЕКТ */
-.glitch {
-    /* Основной цвет — яркий алый */
-    color: #ff0000; 
-    font-size: 3.5rem; 
-    letter-spacing: 15px; 
-    font-weight: 800;
-    text-transform: lowercase; 
-    position: relative; 
-    /* Глубокое красное свечение */
-    text-shadow: 0 0 10px rgba(255, 0, 0, 0.7), 0 0 20px rgba(139, 0, 0, 0.5);
-    cursor: default;
-    /* Анимация пульсации: ник будет "дышать" огнем */
-    animation: blood-pulse 3s infinite ease-in-out;
+.window {
+    width: 850px;
+    max-width: 95vw;
+    min-height: 580px;
+
+    background: rgba(10, 10, 10, 0.65);
+    backdrop-filter: blur(12px);
+
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 8px;
+
+    box-shadow:
+        0 0 80px rgba(0,0,0,0.75),
+        0 0 25px rgba(0,0,0,0.5);
+
+    position: relative;
+    overflow: hidden;
+    z-index: 10;
+
+    display: flex;
+    flex-direction: column;
 }
 
-/* Глитч-эффект при наведении теперь в оттенках бордового и ярко-оранжевого */
-.glitch:hover::before {
-    left: 2px; 
-    text-shadow: -2px 0 #4a0000; /* Темная кровь */
-    clip: rect(44px, 450px, 56px, 0);
-    animation: glitch-anim 5s infinite linear alternate-reverse;
+.window::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+
+    background:
+        linear-gradient(
+            rgba(255,255,255,0.015),
+            rgba(0,0,0,0.08)
+        );
+
+    opacity: 0.6;
+    pointer-events: none;
 }
-
-.glitch:hover::after {
-    left: -2px; 
-    text-shadow: -2px 0 #ff4d4d; /* Светлая, свежая кровь */
-    clip: rect(44px, 450px, 56px, 0);
-    animation: glitch-anim2 5s infinite linear alternate-reverse;
-}
-
-/* Анимация пульсации для "горящего" ника */
-@keyframes blood-pulse {
-    0%, 100% { 
-        color: #ff0000; 
-        text-shadow: 0 0 15px rgba(255, 0, 0, 0.6); 
-    }
-    50% { 
-        color: #8b0000; 
-        text-shadow: 0 0 30px rgba(255, 0, 0, 0.9), 0 0 10px #000; 
-    }
-}
-
-        .dvd-mode {
-            transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
-        }
-
-        .window {
-            width: 850px; height: 580px; max-width: 95vw;
-            background: var(--win11-bg); backdrop-filter: blur(40px);
-            border: 1px solid var(--win11-border); border-radius: 8px;
-            box-shadow: 0 0 50px rgba(0,0,0,0.9);
-            display: flex; flex-direction: column; position: absolute;
-            z-index: 10; transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.5s;
-        }
-
-        .window.closed { transform: scale(0.9) translateY(50px) !important; opacity: 0; pointer-events: none; }
-
-        .window-header {
-            height: 42px; display: flex; align-items: center;
-            justify-content: space-between; padding: 0 4px 0 16px;
-            cursor: move; border-bottom: 1px solid rgba(139, 0, 0, 0.1);
-        }
-        
-        /* Эффект для текста в заголовке */
-.window-title {
-    color: #c2a37d; /* Золотисто-песочный цвет (в стиле меню SH) */
-    text-shadow: 0 0 5px rgba(194, 163, 125, 0.5);
-    font-weight: bold;
-    animation: title-flicker 4s infinite; /* Эффект мигания */
-}
-
-/* Иконка черепа отдельно — сделаем её ярко-красной */
-.window-title i {
-    color: #ff0000;
-    margin-right: 8px;
-    filter: drop-shadow(0 0 3px #ff0000);
-}
-
-@keyframes title-flicker {
-    0%, 18%, 22%, 25%, 53%, 57%, 100% { opacity: 1; }
-    20%, 24%, 55% { opacity: 0.6; text-shadow: none; }
-}
-
-.window-header:hover .window-title {
-    color: #fff;
-    text-shadow: 0 0 10px #fff, 0 0 20px #8b0000;
-    transition: 0.3s;
-}
-        .window-controls { display: flex; }
-        
-        .win-btn {
-            width: 46px; height: 34px; display: flex;
-            align-items: center; justify-content: center;
-            font-size: 14px; transition: 0.2s; cursor: pointer; color: #666;
-        }
-        .win-btn:hover { background: rgba(139, 0, 0, 0.2); color: #fff; }
-        .win-btn.close:hover { background: #8b0000; color: #000; }
 
         .window-body {
-            flex-grow: 1; display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
-            padding: 20px; position: relative; overflow-y: auto;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 28px 20px;
+            position: relative;
+            z-index: 1;
         }
-        
+
         .avatar-frame {
-            width: 140px; height: 140px; border-radius: 50%;
-            overflow: hidden; border: 2px solid rgba(139, 0, 0, 0.3);
-            margin-bottom: 25px; filter: sepia(0.3) contrast(1.1);
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            margin-bottom: 26px;
+            filter: grayscale(0.45) contrast(1.2) brightness(0.78);
+    box-shadow:
+        0 0 30px rgba(0,0,0,0.8),
+        0 0 10px rgba(255,255,255,0.08);
         }
-        .avatar-frame img { width: 100%; height: 100%; object-fit: cover; }
-        
-        .status-bar { 
-            margin: 25px 0; font-family: 'Consolas', monospace; 
-            color: #888; background: rgba(0,0,0,0.6); padding: 10px 20px; 
-            border-radius: 4px; font-size: 0.85rem; border: 1px solid rgba(139, 0, 0, 0.2);
+
+        .avatar-frame img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
         }
 
-        .win-action-btn {
-            background: #1a0000; color: #8b0000; border: 1px solid #8b0000;
-            padding: 12px 40px; letter-spacing: 3px; cursor: pointer; 
-            transition: 0.4s; margin-bottom: 30px; text-transform: uppercase;
+        .glitch {
+            position: relative;
+            display: inline-block;
+            color: #c0c0c0;
+            font-size: 3.5rem;
+            line-height: 1;
+            letter-spacing: 18px;
+            font-weight: 800;
+            text-transform: lowercase;
+            cursor: default;
+            animation: dark-pulse 4s infinite ease-in-out;
+            text-shadow:
+                0 0 8px rgba(255, 255, 255, 0.08),
+                0 0 20px rgba(0, 0, 0, 0.9);
         }
-        .win-action-btn:hover { background: #8b0000; color: #000; box-shadow: 0 0 20px var(--sh-glow); }
 
-        .socials { display: flex; gap: 30px; font-size: 1.4rem; margin-bottom: 20px; }
-        .socials a { color: #8b0000; opacity: 0.5; transition: 0.4s; }
-        .socials a:hover { animation: window-shake 0.1s infinite; opacity: 1; transform: scale(1.2); filter: drop-shadow(0 0 5px #8b0000); }
-
-        #restore-btn {
-            position: fixed; opacity: 0; visibility: hidden;
-            background: rgba(20, 20, 20, 0.9); border: 1px solid var(--win11-accent);
-            color: #8b0000; padding: 15px 30px; cursor: pointer; z-index: 100;
+        .glitch::before,
+        .glitch::after {
+            content: attr(data-text);
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            pointer-events: none;
+            white-space: pre;
         }
-        #restore-btn.visible { opacity: 1; visibility: visible; }
 
-        #hack-overlay {
-    display: none; position: absolute; top: 0; left: 0;
-    width: 100%; height: 100%; background: #0a0000;
-    color: #8b0000; 
-    /* Настраиваем отступы: сверху 10px, по бокам 20px, снизу 20px */
-    padding: 30px 30px 30px 30px; 
-    font-family: 'Consolas', monospace;
-    z-index: 100; box-sizing: border-box;
-    overflow-y: auto;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-}
+        .glitch:hover::before {
+            opacity: 0.18;
+            color: #9a9a9a;
+            transform: translate(-1px, 0);
+            animation: glitch-1 0.8s infinite;
+        }
 
-/* Скрываем скроллбар для Chrome, Safari, Opera */
-#hack-overlay::-webkit-scrollbar {
-    display: none;
-}
+        .glitch:hover::after {
+            opacity: 0.14;
+            color: #e0e0e0;
+            transform: translate(1px, 0);
+            animation: glitch-2 0.8s infinite;
+        }
 
-        .footer-credits { font-size: 10px; opacity: 0.3; letter-spacing: 2px; font-family: 'Consolas', monospace; }
+        .status-bar {
+            margin: 26px 0 24px;
+            padding: 12px 24px;
+            max-width: min(520px, 78vw);
+            background: rgba(0, 0, 0, 0.82);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            color: #8a8a8a;
+            font-family: Consolas, monospace;
+            font-size: 0.85rem;
+            box-shadow: inset 0 0 25px rgba(255, 255, 255, 0.015);
+            text-align: center;
+        }
+
+        .socials {
+            display: flex;
+            gap: 30px;
+            font-size: 1.4rem;
+            margin-bottom: 22px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .socials a {
+            color: #404040;
+            opacity: 0.72;
+            transition: 0.35s ease;
+            text-decoration: none;
+        }
+
+        .socials a:hover {
+            color: #d0d0d0;
+            opacity: 1;
+            transform: scale(1.12);
+            filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.12));
+        }
+
+        .footer-credits {
+            font-size: 11px;
+            opacity: 0.5;
+            letter-spacing: 3px;
+            color: #565656;
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.03);
+            font-family: Consolas, monospace;
+            text-align: center;
+        }
 
         @media (max-width: 600px) {
-            .glitch { font-size: 2rem; letter-spacing: 5px; }
-            .window { width: 95vw; height: auto; min-height: 520px; }
+            .window {
+                width: 95vw;
+                min-height: 520px;
+                border-radius: 6px;
+            }
+
+            .glitch {
+                font-size: 2rem;
+                letter-spacing: 6px;
+            }
+
+            .socials {
+                gap: 22px;
+            }
+
+            .status-bar {
+                max-width: 86vw;
+            }
         }
     </style>
 </head>
 <body>
+    <div class="noise"></div>
+    <div class="background"></div>
 
-<div class="noise"></div>
-<div class="background"></div>
+    <div class="window" id="arimaWindow">
+        <div class="window-body">
+            <div class="avatar-frame">
+                <img src="https://i.pinimg.com/736x/8a/5d/8f/8a5d8f9ab6712bd4e7b6e9790c8953ac.jpg" alt="arima">
+            </div>
 
-<button id="restore-btn" onclick="openWindow()">
-    <i class="fa-solid fa-eye" style="margin-right: 10px;"></i> ВЕРНУТЬСЯ В ТУМАН
-</button>
+            <div class="glitch" data-text="ａｒｉｍａ">ａｒｉｍａ</div>
 
-<div class="window" id="arimaWindow">
-    <div class="window-header" id="windowHeader">
-        <div class="window-title"><i class="fa-solid fa-skull"></i> Arima Restricted Access</div>
-        <div class="window-controls">
-            <div class="win-btn" onclick="closeWindow()"><i class="fa-solid fa-minus"></i></div>
-            <div class="win-btn"><i class="fa-regular fa-square"></i></div>
-            <div class="win-btn close" onclick="closeWindow()"><i class="fa-solid fa-xmark"></i></div>
+            <div class="status-bar">> <span id="typing"></span></div>
+
+            <div class="socials">
+                <a href="https://t.me/satorugojojujutsu" target="_blank" rel="noopener noreferrer" title="Telegram">
+                    <i class="fab fa-telegram"></i>
+                </a>
+                <a href="https://github.com/arimaforu" target="_blank" rel="noopener noreferrer" title="GitHub">
+                    <i class="fab fa-github"></i>
+                </a>
+                <a href="https://steamcommunity.com/id/sugurugetojjk/" target="_blank" rel="noopener noreferrer" title="Steam">
+                    <i class="fab fa-steam"></i>
+                </a>
+                <a href="https://arimadev.ru" target="_blank" rel="noopener noreferrer" title="Перейти к Mizuki (Dark Souls)">
+                    <i class="fa-solid fa-door-open"></i>
+                </a>
+            </div>
+
+            <div class="footer-credits">© 2026 Arima216. LOST IN SILENT HILL</div>
         </div>
     </div>
-    
-    <div class="window-body">
-        <div id="hack-overlay"></div>
-        <div class="avatar-frame">
-            <img src="https://i.pinimg.com/736x/8a/5d/8f/8a5d8f9ab6712bd4e7b6e9790c8953ac.jpg" alt="arima">
-        </div>
-        <div class="glitch">ａｒｉｍａ</div>
-        <div class="status-bar">> <span id="typing"></span></div>
-        <button class="win-action-btn" onclick="runHack()">ИНИЦИИРОВАТЬ</button>
-        <div class="socials">
-            <a href="https://t.me/satorugojojujutsu" target="_blank" title="Telegram">
-                <i class="fab fa-telegram"></i>
-            </a>
-            <a href="https://github.com/KiraGigachad" target="_blank" title="GitHub">
-                <i class="fab fa-github"></i>
-            </a>   
-            <a href="https://discord.gg/k6tcemCQ" target="_blank" title="Discord">
-                <i class="fab fa-discord"></i>
-            </a>
-            <a href="https://steamcommunity.com/id/sugurugetojjk/" target="_blank" title="Steam">
-                <i class="fab fa-steam"></i>
-            </a>
-            <a href="https://arimadev.ru/mizuki" title="Перейти к Mizuki (Dark Souls)">
-                <i class="fa-solid fa-door-open"></i>
-            </a>
-        </div>
-        <div class="footer-credits">© 2026 Arima216. LOST IN SILENT HILL</div>
-    </div>
-</div>
 
-<script>
-    const win = document.getElementById('arimaWindow');
-    const header = document.getElementById('windowHeader');
-    const restoreBtn = document.getElementById('restore-btn');
-    const typingSpan = document.getElementById('typing');
-    const fullText = "In my restless dreams, I see that town...";
-    let charIdx = 0;
+    <script>
+        const typingSpan = document.getElementById('typing');
+        const fullText = "In my restless dreams, I see that town...";
+        let charIdx = 0;
 
-    let isDragging = false;
-    let startX, startY, startLeft, startTop;
-
-    function startDragging(e) {
-        if (e.target.closest('.window-controls')) return;
-        isDragging = true;
-        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-        startX = clientX; startY = clientY;
-        startLeft = win.offsetLeft; startTop = win.offsetTop;
-        win.style.transition = 'none'; 
-    }
-
-function moveWindow(e) {
-        if (!isDragging) return;
-        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-
-        // Рассчитываем новые координаты
-        let newX = startLeft + (clientX - startX);
-        let newY = startTop + (clientY - startY);
-
-        // Ограничение по горизонтали (X)
-        const minX = 0;
-        const maxX = window.innerWidth - win.offsetWidth;
-        
-        // Ограничение по вертикали (Y)
-        const minY = 0;
-        const maxY = window.innerHeight - win.offsetHeight;
-
-        // Применяем ограничения
-        if (newX < minX) newX = minX;
-        if (newX > maxX) newX = maxX;
-        if (newY < minY) newY = minY;
-        if (newY > maxY) newY = maxY;
-
-        win.style.left = newX + 'px';
-        win.style.top = newY + 'px';
-        win.style.transform = 'none'; 
-    }
-    function stopDragging() {
-        isDragging = false;
-        win.style.transition = 'transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.5s';
-    }
-
-    header.addEventListener('mousedown', startDragging);
-    document.addEventListener('mousemove', moveWindow);
-    document.addEventListener('mouseup', stopDragging);
-
-    function centerWindow() {
-        const x = (window.innerWidth - win.offsetWidth) / 2;
-        const y = (window.innerHeight - win.offsetHeight) / 2;
-        win.style.left = x + 'px'; win.style.top = y + 'px';
-        win.style.transform = 'none';
-    }
-
-    function closeWindow() {
-        win.classList.add('closed');
-        setTimeout(() => { restoreBtn.classList.add('visible'); }, 300);
-    }
-
-    function openWindow() {
-        restoreBtn.classList.remove('visible');
-        centerWindow();
-        setTimeout(() => { win.classList.remove('closed'); resetTyping(); }, 200);
-    }
-
-    function resetTyping() { typingSpan.innerHTML = ""; charIdx = 0; type(); }
-
-    function type() {
-        if (charIdx < fullText.length) {
-            typingSpan.innerHTML += fullText.charAt(charIdx);
-            charIdx++; setTimeout(type, 70);
+        function resetTyping() {
+            typingSpan.textContent = "";
+            charIdx = 0;
+            type();
         }
-    }
 
-    let dvdActive = false;
-let dvdPos = { x: 0, y: 0, dx: 3, dy: 3 }; // Скорость движения
-let dvdInterval;
-let inputBuffer = "";
-
-// Отслеживаем ввод "dvd"
-document.addEventListener('keydown', (e) => {
-    inputBuffer += e.key.toLowerCase();
-    if (inputBuffer.endsWith("dvd")) {
-        toggleDVDMode();
-        inputBuffer = "";
-    }
-    if (inputBuffer.length > 10) inputBuffer = inputBuffer.substring(1);
-});
-
-function toggleDVDMode() {
-    dvdActive = !dvdActive;
-    
-    if (dvdActive) {
-        win.classList.add('dvd-mode');
-        // Начальная позиция - текущая
-        dvdPos.x = win.offsetLeft;
-        dvdPos.y = win.offsetTop;
-        win.style.transition = "none"; // Отключаем плавность для мгновенного движения
-        dvdInterval = setInterval(animateDVD, 16); // ~60 FPS
-    } else {
-        clearInterval(dvdInterval);
-        win.classList.remove('dvd-mode');
-        win.style.borderColor = "var(--win11-border)";
-        win.style.boxShadow = "0 0 50px rgba(0,0,0,0.9)";
-        win.style.transition = 'transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.5s';
-    }
-}
-
-function animateDVD() {
-    if (!dvdActive || isDragging) return;
-
-    const screenW = window.innerWidth;
-    const screenH = window.innerHeight;
-    const winW = win.offsetWidth;
-    const winH = win.offsetHeight;
-
-    dvdPos.x += dvdPos.dx;
-    dvdPos.y += dvdPos.dy;
-
-    let hit = false;
-
-    // Проверка столкновения с лево/право
-    if (dvdPos.x + winW >= screenW || dvdPos.x <= 0) {
-        dvdPos.dx *= -1;
-        hit = true;
-    }
-    // Проверка столкновения с верх/низ
-    if (dvdPos.y + winH >= screenH || dvdPos.y <= 0) {
-        dvdPos.dy *= -1;
-        hit = true;
-    }
-
-    if (hit) {
-        // Меняем цвет на случайный при ударе (в стиле Silent Hill - кровавые/темные тона)
-        const colors = ['#8b0000', '#ff0000', '#4a0000', '#310000', '#610000'];
-        const randomColor = colors[Math.floor(Math.random() * colors.length)];
-        win.style.borderColor = randomColor;
-        win.style.boxShadow = `0 0 30px ${randomColor}`;
-    }
-
-    win.style.left = dvdPos.x + 'px';
-    win.style.top = dvdPos.y + 'px';
-}
-
-    function runHack() {
-        const overlay = document.getElementById('hack-overlay');
-        overlay.style.display = 'block';
-        overlay.innerHTML = "";
-        win.classList.add('shaking'); 
-
-        const lines = [
-            "> Initializing protocol: SILENT_HILL",
-            "> Accessing restricted memory sectors...",
-            "> [OK] Connection established with 'Otherworld' node",
-            "> Loading identity profile: ARIMA",
-            "> Warning: Static interference detected",
-            "--------------------------------",
-            "> 'In my restless dreams, I see that town...'",
-            "> 'You promised you'd take me there again someday.'",
-            "> 'But you never did.'",
-            "--------------------------------",
-            "> Analyzing psychological state: STABLE/DISTORTED",
-            "> Memory fragment 04: 'There was a hole here. It's gone now.'",
-            "> Memory fragment 09: 'James... honey...'",
-            "> [!] ALERT: Pyramid Head process detected in background",
-            "--------------------------------",
-            "> Synchronizing reality...",
-            "> Protocol complete. Welcome back, Arima."
-        ];
-
-let lineIdx = 0;
-
-        function printLines() {
-            if (lineIdx < lines.length) {
-                const lineDiv = document.createElement('div');
-                lineDiv.style.marginBottom = '6px';
-                lineDiv.style.opacity = '0.9';
-                overlay.appendChild(lineDiv);
-                
-                let charIdx = 0;
-                const currentLine = lines[lineIdx];
-
-                // Функция для печати символов внутри одной строки
-                function typeChar() {
-                    if (charIdx < currentLine.length) {
-                        lineDiv.innerHTML += currentLine.charAt(charIdx);
-                        charIdx++;
-                        overlay.scrollTop = overlay.scrollHeight;
-                        // Скорость печати одного символа (40мс)
-                        setTimeout(typeChar, 25); 
-                    } else {
-                        // Пауза после завершения строки перед переходом к следующей
-                        lineIdx++;
-                        setTimeout(printLines, 400); 
-                    }
-                }
-
-                typeChar();
-            } else {
-                setTimeout(() => { 
-                    overlay.style.display = 'none'; 
-                    win.classList.remove('shaking'); 
-                }, 3000);
+        function type() {
+            if (charIdx < fullText.length) {
+                typingSpan.textContent += fullText.charAt(charIdx);
+                charIdx++;
+                setTimeout(type, 70);
             }
         }
-        printLines();
-    }
 
-    window.onload = () => { centerWindow(); resetTyping(); };
-    window.onresize = centerWindow;
-
-</script>
-
+        window.addEventListener('load', resetTyping);
+    </script>
 </body>
 </html>
