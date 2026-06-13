@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ArimaDev | Gateway</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -91,88 +92,6 @@
 
         .gate-arima:hover .gate-name { color: var(--arima-color); text-shadow: 0 0 25px var(--arima-color); }
 
-        /* Terminator Modal Оптимизация */
-        #terminator-modal {
-            display: none; position: fixed; inset: 0;
-            background: #000; z-index: 1000; padding: 15px;
-        }
-
-        .modal-frame { position: relative; width: 100%; height: 100%; border: 1px solid #111; }
-
-        .close-btn {
-            position: absolute; right: 20px; top: 20px;
-            color: #444; cursor: pointer; z-index: 1001;
-            font-size: 9px; letter-spacing: 2px;
-            border: 1px solid #222; padding: 6px 12px;
-            transition: 0.3s; text-transform: uppercase;
-        }
-
-        .close-btn:hover { color: var(--term-accent); border-color: var(--term-accent); background: rgba(0,255,65,0.05); }
-
-        .terminal-widget {
-    position: fixed;
-    bottom: 30px;
-    left: 30px;
-    width: 50px;
-    height: 50px;
-    background: rgba(0, 0, 0, 0.8);
-    border: 1px solid rgba(0, 255, 65, 0.2);
-    border-radius: 4px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: rgba(0, 255, 65, 0.5);
-    text-decoration: none;
-    z-index: 200;
-    transition: all 0.4s ease;
-    overflow: hidden;
-    backdrop-filter: blur(5px);
-}
-
-.terminal-widget:hover {
-    border-color: #00ff41;
-    color: #00ff41;
-    box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
-    transform: translateY(-5px);
-}
-
-.terminal-icon {
-    font-size: 1.2rem;
-    z-index: 2;
-}
-
-/* Эффект бегущей линии сканера */
-.terminal-scanner {
-    position: absolute;
-    top: -100%;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(
-        to bottom,
-        transparent,
-        rgba(0, 255, 65, 0.1),
-        transparent
-    );
-    animation: scan-line 3s infinite linear;
-    z-index: 1;
-}
-
-@keyframes scan-line {
-    0% { top: -100%; }
-    100% { top: 100%; }
-}
-
-/* Скрытие на мобилках, чтобы не мешало контенту */
-@media (max-width: 600px) {
-    .terminal-widget {
-        bottom: 20px;
-        left: 20px;
-        width: 40px;
-        height: 40px;
-    }
-}
-
         footer {
             position: fixed; bottom: 25px; width: 100%;
             text-align: center; z-index: 30; font-size: 0.55rem;
@@ -202,21 +121,7 @@
 
     </main>
 
-    <div id="terminator-modal">
-        <div class="modal-frame">
-            <div class="close-btn" onclick="closeTerminator()">[ Terminate_Session ]</div>
-            <iframe id="term-iframe" src="" width="100%" height="100%" frameborder="0"></iframe>
-        </div>
-    </div>
-
-    <a href="/terminal" class="terminal-widget" title="System Access">
-    <div class="terminal-icon">
-        <i class="fa-solid fa-terminal"></i>
-    </div>
-    <div class="terminal-scanner"></div>
-</a>
-
-    <footer>© 2026 ARIMA216. WHERE DREAMS COME TO DIE</footer>
+    <footer>© 2026 ARIMA216</footer>
 
     <script>
         const canvas = document.getElementById('particleCanvas');
@@ -225,11 +130,9 @@
         const ghostText = document.getElementById('ghost-text');
         const mainUI = document.getElementById('main-ui');
         const trans = document.getElementById('page-transition');
-        const termModal = document.getElementById('terminator-modal');
-        const termIframe = document.getElementById('term-iframe');
         
         let particles = [], mouse = { tx: 0, ty: 0 }, mode = 'normal';
-        let idleTimer, isIdle = false, buffer = "";
+        let idleTimer, isIdle = false;
 
         // Инициализация
         window.addEventListener('load', () => {
@@ -238,26 +141,6 @@
             animate();
             resetIdle();
         });
-
-        // Клавиатура (Пасхалка)
-        document.addEventListener('keydown', (e) => {
-            buffer = (buffer + e.key.toLowerCase()).slice(-20);
-            if (buffer.includes("aeza") || buffer.includes("terminator")) {
-                openTerminator();
-                buffer = "";
-            }
-            resetIdle();
-        });
-
-        function openTerminator() {
-            termIframe.src = "https://terminator.aeza.net";
-            termModal.style.display = 'block';
-        }
-
-        function closeTerminator() {
-            termModal.style.display = 'none';
-            termIframe.src = "";
-        }
 
         // Canvas Логика
         function resize() {
@@ -284,18 +167,20 @@
             idleTimer = setTimeout(showGhost, 8000);
         }
 
-        function showGhost() {
-            if (termModal.style.display === 'block') return;
-            isIdle = true;
-            const texts = {
-                arima: "In my restless dreams, I see that town...",
-                normal: "Can you see the truth?"
-            };
-            ghostText.innerText = texts[mode] || texts.normal;
-            ghostText.style.opacity = '1';
-            mainUI.style.opacity = '0';
-            mainUI.style.transform = 'scale(0.98)';
-        }
+function showGhost() {
+    isIdle = true;
+
+    const texts = {
+        arima: "In my restless dreams, I see that town...",
+        normal: "Can you see the truth?"
+    };
+
+    ghostText.innerText = texts[mode];
+
+    ghostText.style.opacity = '1';
+    mainUI.style.opacity = '0';
+    mainUI.style.transform = 'scale(0.98)';
+}
 
         function setMode(m) {
             mode = m;
@@ -313,23 +198,27 @@
                 this.sx = Math.random() * 0.2 - 0.1;
                 this.op = Math.random() * 0.5 + 0.1;
             }
-            update() {
-                this.x -= mouse.tx * (this.size * 0.4);
-                this.y -= mouse.ty * (this.size * 0.4);
-                
-                let ts = this.baseSize;
-                this.color = '255, 255, 255';
-                
-                else if (mode === 'arima') { this.color = '220, 0, 0'; ts *= 2; }
+update() {
+    this.x -= mouse.tx * (this.size * 0.4);
+    this.y -= mouse.ty * (this.size * 0.4);
 
-                this.size += (ts - this.size) * 0.1;
-                this.y += this.sy;
-                this.x += this.sx;
+    let ts = this.baseSize;
 
-                if (this.y < -10) this.y = canvas.height + 10;
-                if (this.x < -10) this.x = canvas.width + 10;
-                if (this.x > canvas.width + 10) this.x = -10;
-            }
+    if (mode === 'arima') {
+        this.color = '220, 0, 0';
+        ts *= 2;
+    } else {
+        this.color = '255, 255, 255';
+    }
+
+    this.size += (ts - this.size) * 0.1;
+    this.y += this.sy;
+    this.x += this.sx;
+
+    if (this.y < -10) this.y = canvas.height + 10;
+    if (this.x < -10) this.x = canvas.width + 10;
+    if (this.x > canvas.width + 10) this.x = -10;
+}
             draw() {
                 ctx.fillStyle = `rgba(${this.color}, ${this.op})`;
                 ctx.beginPath();
