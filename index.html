@@ -12,7 +12,6 @@
     <style>
         :root {
             --arima-color: #ff0000;
-            --mizuki-color: #ffaa00;
             --term-accent: #00ff41;
             --transition-speed: 1.2s;
         }
@@ -91,7 +90,6 @@
         }
 
         .gate-arima:hover .gate-name { color: var(--arima-color); text-shadow: 0 0 25px var(--arima-color); }
-        .gate-mizuki:hover .gate-name { color: var(--mizuki-color); text-shadow: 0 0 25px var(--mizuki-color); }
 
         /* Terminator Modal Оптимизация */
         #terminator-modal {
@@ -202,10 +200,6 @@
             <span class="gate-desc">Restless Dreams</span>
         </a>
 
-        <a href="/mizuki" class="gate gate-mizuki" onmouseenter="setMode('mizuki')" onmouseleave="setMode('normal')">
-            <span class="gate-name">Mizuki</span>
-            <span class="gate-desc">Fires Fade</span>
-        </a>
     </main>
 
     <div id="terminator-modal">
@@ -295,7 +289,6 @@
             isIdle = true;
             const texts = {
                 arima: "In my restless dreams, I see that town...",
-                mizuki: "The fire reaches for the sky.",
                 normal: "Can you see the truth?"
             };
             ghostText.innerText = texts[mode] || texts.normal;
@@ -327,7 +320,6 @@
                 let ts = this.baseSize;
                 this.color = '255, 255, 255';
                 
-                if (mode === 'mizuki') { this.color = '255, 160, 50'; ts *= 2.5; }
                 else if (mode === 'arima') { this.color = '220, 0, 0'; ts *= 2; }
 
                 this.size += (ts - this.size) * 0.1;
