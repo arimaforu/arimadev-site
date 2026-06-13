@@ -9,13 +9,10 @@
     <style>
         :root {
             --bg: #050505;
-            --panel: rgba(8, 8, 8, 0.82);
-            --panel-strong: rgba(10, 10, 10, 0.92);
+            --panel: rgba(10, 10, 10, 0.58);
             --border: rgba(255, 255, 255, 0.05);
-            --border-soft: rgba(255, 255, 255, 0.03);
             --text: #c0c0c0;
             --text-secondary: #7a7a7a;
-            --glow: rgba(255, 255, 255, 0.05);
         }
 
         ::-webkit-scrollbar {
@@ -57,29 +54,22 @@
             z-index: 9999;
         }
 
-.background {
-    position: fixed;
-    inset: -20px;
-
-    background:
-        linear-gradient(
-            rgba(0,0,0,0.25),
-            rgba(0,0,0,0.35)
-        ),
-        url("https://i.pinimg.com/1200x/61/4a/77/614a7793a4377f2ec6896f1ceba83ae6.jpg");
-
-    background-size: cover;
-    background-position: center 35%;
-
-    filter:
-        blur(8px)
-        grayscale(0.85)
-        brightness(0.45)
-        contrast(1.1);
-
-    transform: scale(1.08);
-    z-index: -1;
-}
+        .background {
+            position: fixed;
+            inset: -20px;
+            background:
+                linear-gradient(rgba(0,0,0,0.25), rgba(0,0,0,0.35)),
+                url("https://i.pinimg.com/736x/f6/46/44/f6464445499b1b78c4359e28ff7cd998.jpg");
+            background-size: cover;
+            background-position: center 35%;
+            filter:
+                blur(4px)
+                grayscale(0.85)
+                brightness(0.45)
+                contrast(1.1);
+            transform: scale(1.08);
+            z-index: -1;
+        }
 
         @keyframes dark-pulse {
             0%, 100% {
@@ -99,99 +89,113 @@
         }
 
         @keyframes glitch-1 {
-            0% { transform: translate(0, 0); opacity: 0; }
-            20% { transform: translate(-1px, 0); opacity: 0.18; }
-            40% { transform: translate(1px, 0); opacity: 0.1; }
-            60% { transform: translate(-2px, 0); opacity: 0.2; }
-            80% { transform: translate(2px, 0); opacity: 0.12; }
+            0%   { transform: translate(0, 0); opacity: 0; }
+            20%  { transform: translate(-1px, 0); opacity: 0.18; }
+            40%  { transform: translate(1px, 0); opacity: 0.10; }
+            60%  { transform: translate(-2px, 0); opacity: 0.20; }
+            80%  { transform: translate(2px, 0); opacity: 0.12; }
             100% { transform: translate(0, 0); opacity: 0; }
         }
 
         @keyframes glitch-2 {
-            0% { transform: translate(0, 0); opacity: 0; }
-            20% { transform: translate(1px, 0); opacity: 0.14; }
-            40% { transform: translate(-1px, 0); opacity: 0.1; }
-            60% { transform: translate(2px, 0); opacity: 0.18; }
-            80% { transform: translate(-2px, 0); opacity: 0.1; }
+            0%   { transform: translate(0, 0); opacity: 0; }
+            20%  { transform: translate(1px, 0); opacity: 0.14; }
+            40%  { transform: translate(-1px, 0); opacity: 0.10; }
+            60%  { transform: translate(2px, 0); opacity: 0.18; }
+            80%  { transform: translate(-2px, 0); opacity: 0.10; }
             100% { transform: translate(0, 0); opacity: 0; }
         }
 
-.window {
-    width: 850px;
-    max-width: 95vw;
-    min-height: 580px;
+        .window {
+            /* Жестко фиксируем разрешение окна */
+            width: 760px;
+            height: 560px;
+            max-width: 95vw;
+            max-height: 95vh;
+            background: var(--panel);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            box-shadow:
+                0 0 80px rgba(0,0,0,0.75),
+                0 0 25px rgba(0,0,0,0.50);
+            position: relative;
+            overflow: hidden;
+            z-index: 10;
+            display: flex;
+        }
 
-    background: rgba(10, 10, 10, 0.65);
-    backdrop-filter: blur(12px);
-
-    border: 1px solid rgba(255,255,255,0.05);
-    border-radius: 8px;
-
-    box-shadow:
-        0 0 80px rgba(0,0,0,0.75),
-        0 0 25px rgba(0,0,0,0.5);
-
-    position: relative;
-    overflow: hidden;
-    z-index: 10;
-
-    display: flex;
-    flex-direction: column;
-}
-
-.window::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-
-    background:
-        linear-gradient(
-            rgba(255,255,255,0.015),
-            rgba(0,0,0,0.08)
-        );
-
-    opacity: 0.6;
-    pointer-events: none;
-}
+        .window::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(rgba(255,255,255,0.015), rgba(0,0,0,0.08));
+            opacity: 0.6;
+            pointer-events: none;
+        }
 
         .window-body {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 28px 20px;
+            width: 100%;
+            height: 100%;
+            box-sizing: border-box;
             position: relative;
             z-index: 1;
+
+            /* Переводим на Flexbox для идеального распределения по высоте 560px */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: 35px 40px;
+        }
+
+        .top-area {
+            display: flex;
+            margin-top: 22px;
+            justify-content: center;
+            align-items: center;
         }
 
         .avatar-frame {
-            width: 140px;
-            height: 140px;
+            width: 150px;
+            height: 150px;
             border-radius: 50%;
             overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            margin-bottom: 26px;
+            border: 1px solid #202020;
             filter: grayscale(0.45) contrast(1.2) brightness(0.78);
-    box-shadow:
-        0 0 30px rgba(0,0,0,0.8),
-        0 0 10px rgba(255,255,255,0.08);
+            box-shadow:
+                0 0 60px rgba(0,0,0,0.9),
+                0 0 12px rgba(255,255,255,0.04);
+            flex: 0 0 auto;
         }
 
         .avatar-frame img {
             width: 100%;
             height: 100%;
             object-fit: cover;
+            object-position: center 15%;
             display: block;
+        }
+
+        .middle-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            margin-top: -30px;
+            align-items: center;
+            width: 100%;
         }
 
         .glitch {
             position: relative;
             display: inline-block;
+            transform: translateX(6px);
+            margin: 0 0 24px 0;
             color: #c0c0c0;
-            font-size: 3.5rem;
+            font-size: clamp(2.8rem, 4.8vw, 4rem);
             line-height: 1;
-            letter-spacing: 18px;
+            letter-spacing: 16px;
             font-weight: 800;
             text-transform: lowercase;
             cursor: default;
@@ -226,25 +230,48 @@
         }
 
         .status-bar {
-            margin: 26px 0 24px;
-            padding: 12px 24px;
-            max-width: min(520px, 78vw);
+            width: 100%;
+            max-width: 560px;
+            min-height: 44px;
+            padding: 0 18px;
+            box-sizing: border-box;
             background: rgba(0, 0, 0, 0.82);
             border: 1px solid rgba(255, 255, 255, 0.04);
             color: #8a8a8a;
             font-family: Consolas, monospace;
-            font-size: 0.85rem;
+            font-size: 0.78rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+            overflow: hidden;
             box-shadow: inset 0 0 25px rgba(255, 255, 255, 0.015);
-            text-align: center;
+            letter-spacing: 0.04em;
+        }
+
+        .bottom-area {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .line {
+            width: 140px;
+            height: 1px;
+            background: rgba(255,255,255,0.08);
+            opacity: 0.6;
         }
 
         .socials {
             display: flex;
-            gap: 30px;
-            font-size: 1.4rem;
-            margin-bottom: 22px;
-            flex-wrap: wrap;
+            gap: 34px;
             justify-content: center;
+            align-items: center;
+            font-size: 1.45rem;
+            margin: 0;
         }
 
         .socials a {
@@ -262,33 +289,54 @@
         }
 
         .footer-credits {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
             font-size: 11px;
-            opacity: 0.5;
             letter-spacing: 3px;
             color: #565656;
+            opacity: 0.45;
             text-shadow: 0 0 8px rgba(255, 255, 255, 0.03);
             font-family: Consolas, monospace;
-            text-align: center;
+            z-index: 50;
+            pointer-events: none;
         }
 
-        @media (max-width: 600px) {
+        /* Сохраняем адаптивность, если окно браузера станет меньше 760x560 */
+        @media (max-width: 780px), (max-height: 580px) {
             .window {
                 width: 95vw;
-                min-height: 520px;
+                height: 90vh;
+                min-height: 480px;
                 border-radius: 6px;
             }
 
+            .window-body {
+                padding: 25px 20px;
+            }
+
+            .avatar-frame {
+                width: 120px;
+                height: 120px;
+            }
+
             .glitch {
-                font-size: 2rem;
+                font-size: 2.2rem;
                 letter-spacing: 6px;
+                margin-bottom: 16px;
+            }
+
+            .status-bar {
+                width: 100%;
+                max-width: 400px;
+                min-height: 42px;
+                font-size: 0.74rem;
             }
 
             .socials {
                 gap: 22px;
-            }
-
-            .status-bar {
-                max-width: 86vw;
+                font-size: 1.25rem;
             }
         }
     </style>
@@ -299,36 +347,46 @@
 
     <div class="window" id="arimaWindow">
         <div class="window-body">
-            <div class="avatar-frame">
-                <img src="https://i.pinimg.com/736x/8a/5d/8f/8a5d8f9ab6712bd4e7b6e9790c8953ac.jpg" alt="arima">
+            <div class="top-area">
+                <div class="avatar-frame">
+                    <img src="https://i.pinimg.com/736x/25/ac/d8/25acd8e2a29af7169675981f12369a89.jpg" alt="arima">
+                </div>
             </div>
 
-            <div class="glitch" data-text="ａｒｉｍａ">ａｒｉｍａ</div>
+            <div class="middle-area">
+                <div class="glitch" data-text="ａｒｉｍａ">ａｒｉｍａ</div>
 
-            <div class="status-bar">> <span id="typing"></span></div>
-
-            <div class="socials">
-                <a href="https://t.me/satorugojojujutsu" target="_blank" rel="noopener noreferrer" title="Telegram">
-                    <i class="fab fa-telegram"></i>
-                </a>
-                <a href="https://github.com/arimaforu" target="_blank" rel="noopener noreferrer" title="GitHub">
-                    <i class="fab fa-github"></i>
-                </a>
-                <a href="https://steamcommunity.com/id/sugurugetojjk/" target="_blank" rel="noopener noreferrer" title="Steam">
-                    <i class="fab fa-steam"></i>
-                </a>
-                <a href="https://arimadev.ru" target="_blank" rel="noopener noreferrer" title="Перейти к Mizuki (Dark Souls)">
-                    <i class="fa-solid fa-door-open"></i>
-                </a>
+                <div class="status-bar">
+                    &gt; <span id="typing"></span>
+                </div>
             </div>
 
-            <div class="footer-credits">© 2026 Arima216. LOST IN SILENT HILL</div>
+            <div class="bottom-area">
+                <div class="line"></div>
+
+                <div class="socials">
+                    <a href="https://t.me/satorugojojujutsu" target="_blank" rel="noopener noreferrer" title="Telegram">
+                        <i class="fab fa-telegram"></i>
+                    </a>
+                    <a href="https://github.com/arimaforu" target="_blank" rel="noopener noreferrer" title="GitHub">
+                        <i class="fab fa-github"></i>
+                    </a>
+                    <a href="https://steamcommunity.com/id/sugurugetojjk/" target="_blank" rel="noopener noreferrer" title="Steam">
+                        <i class="fab fa-steam"></i>
+                    </a>
+                    <a href="https://arimadev.ru" target="_blank" rel="noopener noreferrer" title="">
+                        <i class="fa-solid fa-door-open"></i>
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
 
+    <div class="footer-credits">© 2026 Arima216</div>
+
     <script>
         const typingSpan = document.getElementById('typing');
-        const fullText = "In my restless dreams, I see that town...";
+        const fullText = "Why don't I ever realize what I have until it's lost to me?";
         let charIdx = 0;
 
         function resetTyping() {
@@ -341,7 +399,7 @@
             if (charIdx < fullText.length) {
                 typingSpan.textContent += fullText.charAt(charIdx);
                 charIdx++;
-                setTimeout(type, 70);
+                setTimeout(type, 67);
             }
         }
 
